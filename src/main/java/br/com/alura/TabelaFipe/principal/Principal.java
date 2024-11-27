@@ -1,12 +1,17 @@
 package br.com.alura.TabelaFipe.principal;
 
+import java.util.Comparator;
 import java.util.Scanner;
 
+import br.com.alura.TabelaFipe.model.Dados;
+import br.com.alura.TabelaFipe.model.Modelos;
 import br.com.alura.TabelaFipe.service.ConsumoApi;
+import br.com.alura.TabelaFipe.service.ConverteDados;
 
 public class Principal {
     private Scanner leitura = new Scanner(System.in);
     private ConsumoApi consumo = new ConsumoApi();
+    private ConverteDados conversor = new ConverteDados();
     private final String URL_BASE = "https://parallelum.com.br/fipe/api/v1/";
     public void exibeMenu() {
         var menu = """
@@ -32,6 +37,22 @@ public class Principal {
             endereco = URL_BASE + "caminhoes/marcas";
         }
         var json = consumo.obterDados(endereco);
-
-    }
+        var marcas = conversor.obterlista(json, Dados.class);
+        marcas.stream()
+        .sorted (Comparator.comparing (Dados::codigo))
+        .forEach(System.out::println);
+       
+        
+        System.out.println("Informe o código da marca para consulta:");
+        var codigoMarca = leitura.nextLine();
+        
+        endereco = endereco + "/" + codigoMarca + "/modelos";
+        json = consumo.obterDados(endereco);
+        var modeloLista = conversor.obterDados(json, Modelos.class);
+        
+        System.out.println("\nModelos da marcas:");
+        modeloLista.modelos().stream()
+        .sorted (Comparator.comparing (Dados::codigo))
+        .forEach(System.out::println);
+        }
 }
