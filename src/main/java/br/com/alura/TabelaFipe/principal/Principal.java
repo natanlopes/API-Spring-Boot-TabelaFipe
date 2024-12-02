@@ -1,10 +1,16 @@
 package br.com.alura.TabelaFipe.principal;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import br.com.alura.TabelaFipe.model.Dados;
 import br.com.alura.TabelaFipe.model.Modelos;
+import br.com.alura.TabelaFipe.model.Veiculo;
 import br.com.alura.TabelaFipe.service.ConsumoApi;
 import br.com.alura.TabelaFipe.service.ConverteDados;
 
@@ -54,5 +60,42 @@ public class Principal {
         modeloLista.modelos().stream()
         .sorted (Comparator.comparing (Dados::codigo))
         .forEach(System.out::println);
+        
+     // código omitido
+
+        System.out.println("\nDigite uma parte do nome do carro para ser buscado:");
+        var nomeVeiculo = leitura.nextLine();
+
+        List<Dados> modelosFiltrados = modeloLista.modelos().stream()
+        	    .filter(m -> m.nome().toLowerCase().toLowerCase().contains(nomeVeiculo.toLowerCase()))
+        	    .collect(Collectors.toList());
+        
+        System.out.println("\nModelos filtrados");
+        modelosFiltrados.forEach(System.out::println);
+        
+        
+        
+        System.out.println("Digite por favor o código do modelo para buscar os valores de avaliação");
+        var codigoModelo = leitura.nextLine();
+
+        endereco = endereco + "/" + codigoModelo + "/anos";
+        json = consumo.obterDados(endereco);
+        List<Dados> anos = conversor.obterlista(json, Dados.class);
+        
+        List<Veiculo> veiculos = new ArrayList<>();
+        
+        
+        for (int i = 0; i < anos.size(); i++) {
+            var enderecoAnos = endereco + "/" + anos.get(i).codigo();
+            json = consumo.obterDados(enderecoAnos);
+            Veiculo veiculo = conversor.obterDados (json, Veiculo.class);
+            veiculos.add(veiculo);
+            }
+
+        System.out.println("\nTodos os veiculos filtrados com avaliações por ano: "); veiculos.forEach(System.out::println);
+        
+        
+        
+        
         }
 }
